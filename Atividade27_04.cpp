@@ -21,7 +21,7 @@ void printCandidato(Candidato candidato){
 
 template <typename T>
 void print(T valor){
-    cout << valor << " ";
+    cout << valor;
 }
 
 int main(){
@@ -94,12 +94,15 @@ int main(){
     cout << "\natividade 4:\n";
 
 
-    char textoNormal[] = "hello world testando joy world dhsadhasjworldsadjashdas world";
+    char textoNormal[] = "sub hello sub hello su hello sub";
     Lde <char> textoLde = inicializar(textoNormal, strlen(textoNormal));
 
-    substituirVetores((char *)"world", 6, (char *)"mundo", 6, textoLde);
+    Lde <char> retorno = substituirVetores((char *)"sub", 3, (char *)"*", 1, textoLde);
 
-    paraCada(textoLde, print);
+    paraCada(retorno, print);
+
+    liberar(retorno);
+    liberar(textoLde);
 
     return 0;
 }

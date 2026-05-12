@@ -35,6 +35,63 @@ bool vazio(Lde <T> lista){
 }
 
 template <typename T>
+T pop(Lde <T> &lista){
+    if( lista.fim == NULL ){return NULL;}
+    else{
+        T aux2 = lista.fim->info;
+        if(lista.fim == lista.comeco){
+            delete lista.fim;
+            lista.fim = nullptr;
+            lista.comeco = nullptr;
+        } else {
+            lista.fim = lista.fim->eloa;
+            delete lista.fim->elop;
+            lista.fim->elop = nullptr;
+        }
+        return aux2;
+    }
+}
+
+template <typename T>
+T remover(Lde <T> &lista, T valor){
+    if( lista.comeco == NULL ){ // Caso A
+        return NULL;
+    }
+    else if( valor == lista.comeco->info ){ // Caso B
+        T aux2 = lista.comeco->info;
+        if(lista.comeco == lista.fim){
+            delete lista.comeco;
+            lista.comeco = nullptr;
+            lista.fim = nullptr;
+        } else {
+            lista.comeco = lista.comeco->elop;
+            delete lista.comeco->eloa;
+            lista.comeco->eloa = nullptr;
+        }
+        return aux2;
+    }
+    else if( valor == lista.fim->info ) { // Caso C
+        return pop(lista);
+    }
+    else{ // Caso D
+        No <T> *aux = lista.comeco->elop;
+        No <T> * prox;
+        while( aux != nullptr ){
+            prox = aux->elop;
+            if(aux->info == valor){
+                T aux2 = aux->info;
+                aux->eloa->elop = aux->elop;
+                aux->elop->eloa = aux->eloa;
+                delete aux;
+                return aux2;
+            }
+            aux = prox;
+        }
+    }
+    return NULL;
+}
+
+template <typename T>
 bool inserirFinal(Lde <T> &lista, T valor){
     No <T> *novo = new No<T>;
     if( novo == NULL ) return false;
@@ -94,13 +151,13 @@ bool inserir(Lde <T> &lista, T valor){
 }
 
 template <typename T>
-bool pesquisar(Lde <T> &lista, T valor){
+No <T> * pesquisar(Lde <T> &lista, T valor){
     No <T> *aux = lista.comeco;
     while( aux != NULL ){
-        if( valor == aux->info ) return true;
+        if( valor == aux->info ) return aux;
         aux = aux->elop;
     }
-    return false;
+    return NULL;
 }
 
 template <typename T>
@@ -110,6 +167,7 @@ void mostrar(Lde <T> &lista){
         cout << aux->info << " ";
         aux = aux->elop;
     }
+    cout << endl;
 }
 
 template <typename T>
@@ -209,6 +267,15 @@ Lde <T> interseccao(Lde <T> &v1, Lde <T> &v2){
 }
 
 template <typename T>
+void concatenar(Lde <T> &a, Lde <T> b){
+    No <T> * aux = b.comeco;
+    while(aux != nullptr){
+        inserirFinal(a, aux->info);
+        aux = aux->elop;
+    }
+}
+
+template <typename T>
 Lde <T> diferenca(Lde <T> &v1, Lde <T> &v2){
     Lde <T> retorno;
     inicializar(retorno);
@@ -243,55 +310,66 @@ bool pertence(Lde <T> &v1, Lde <T> &v2){
 }
 
 template <typename T>
+void esvaziar(Lde <T> &lista){
+    while (pop(lista) != NULL){}
+}
+
+template <typename T>
 Lde <T> substituirVetores(T * vetorMatriz, size_t tamanhoMatriz, T * vetorNovo, size_t tamanhoNovo, Lde <T> &lista){
     Lde <T> retorno;
     inicializar(retorno);
 
-    Lde <T> novoLde = inicializar(vetorNovo, tamanhoNovo-1);
+    Lde <T> novoLde = inicializar(vetorNovo, tamanhoNovo);
+
+    Lde <T> ldeaux;
+    inicializar(ldeaux);
 
     No <T> * aux = lista.comeco;
 
-    while (aux != nullptr)
+    int guard = 0;
+    while (aux != nullptr && guard < 800)
     {
-        cout << aux->info;
-        if(aux->info == vetorMatriz[0] && aux->elop != nullptr){
-                cout << " teste3 ";
+        guard++;
+        //printf("(is %c == %c?)", aux->info, vetorMatriz[0]);
+        if (aux->info == vetorMatriz[0]){
+            No <T> * start = aux->eloa;
+            esvaziar(ldeaux);
+            //cout << "MAYBE...";
             int index = 0;
-                cout << " teste4 ";
-            No <T> * possivelTroca = aux;
-                cout << " teste5 ";
-            while (index < (tamanhoMatriz) && aux->elop != nullptr){
-                index++;
+
+            while (aux != nullptr)
+            {
+                //printf("(loop %c)", aux->info);
+                if (aux->info != vetorMatriz[index])
+                {
+                    index = 0;
+                    aux = aux->eloa;
+                    break;
+                }
+                inserirFinal(ldeaux, aux->info);
+                if( index >= tamanhoMatriz - 1 ){break;}
                 aux = aux->elop;
-                    cout << " . ";
-                if(index < (tamanhoMatriz) && aux->info != vetorMatriz[index]){
-                    cout << aux->info << " != " << vetorMatriz[index] << " ";
-                    possivelTroca = nullptr;
-                }
+                index++;
             }
-            if (possivelTroca != nullptr){
-                cout << "ant - possivelTroca - fim - pos" << endl;
-                No <T> * fim = aux;
-                cout << " ant.elop = novoLde.comeco " << endl;
-                possivelTroca->eloa->elop = novoLde.comeco;
-                if (fim->elop != nullptr){
-                    cout << " novoLde.fim.elop = pos " << endl;
-                    novoLde.fim->elop = fim->elop;
-                    cout << " pos.eloa = novoLde.fim " << endl;
-                    fim->elop->eloa = novoLde.fim;
-                    cout << " aux = pos" << endl;
-                    aux = fim->elop;
-                    cout << " fim.elop = nullptr " << endl;
-                    fim->elop = nullptr;
-                }
-                cout << " delete NovoLde " << endl;
-                delete (&novoLde); // apenas deleta o Lde, os Nós continuam
-                cout << " testefim " << aux->info << ":" << endl;
-                possivelTroca = nullptr;
+
+            if (index == tamanhoMatriz - 1)
+            {
+                //cout << "ENCONTRADO";
+                concatenar(retorno, novoLde);
+            } else {
+                //cout << "NAH";
+                concatenar(retorno, ldeaux);
             }
+            
+
+        } else {
+            inserirFinal(retorno,aux->info);
         }
-        aux = aux->elop;
+        //mostrar(retorno);
+        if (aux != nullptr)aux = aux->elop;
     }
+
+    return retorno;
     
 }
 
